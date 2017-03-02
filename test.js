@@ -1,10 +1,10 @@
-'use strict';
+'use strict'
 
 var test = require('tape')
-var op = require('./');
+var op = require('./')
 
 test(function (t) {
-  var copy = op();
+  var copy = op()
 
   t.equal(copy.vert, [
     'precision mediump float;',
@@ -26,17 +26,14 @@ test(function (t) {
     '}'
   ].join('\n'))
 
-  t.deepEqual(copy.attributes, {
-    xy: [[-4, -4], [0, 4], [4, -4]]
-  })
-
+  t.deepEqual(copy.attributes, {xy: [[-4, -4], [0, 4], [4, -4]]})
   t.deepEqual(Object.keys(copy.uniforms), ['src', 'dxy'])
   t.equal(copy.primitive, 'triangles')
   t.deepEqual(copy.depth, {enable: false})
   t.equal(copy.count, 3)
 
-  t.end();
-});
+  t.end()
+})
 
 test(function (t) {
   var copy = op({
@@ -44,17 +41,25 @@ test(function (t) {
     frag: 'bar',
     primitive: 'pentagons',
     depth: {enable: true},
-    count: 4,
-  });
+    count: 4
+  })
 
   t.equal(copy.vert, 'foo')
   t.equal(copy.frag, 'bar')
   t.deepEqual(copy.attributes, {
     xy: [[-4, -4], [0, 4], [4, -4]]
   })
+  t.equal(copy.uniforms.src(null, {src: 'foo'}), 'foo')
+
+  t.deepEqual(copy.uniforms.dxy({
+    viewportWidth: 2,
+    viewportHeight: 2
+  }), [0.5, 0.5])
+
+  t.equal(copy.framebuffer(null, {dest: 'foo'}), 'foo')
   t.equal(copy.primitive, 'pentagons')
   t.deepEqual(copy.depth, {enable: true})
   t.equal(copy.count, 4)
 
-  t.end();
-});
+  t.end()
+})
