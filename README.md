@@ -25,6 +25,12 @@ var copy = op()
 
 // Copy mySrcTexture to the screen:
 copy({src: mySrcTexture})
+
+// Copy mySrcTexture to some FBO:
+copy({
+  src: mySrcTexture,
+  dest: myDestFBO
+})
 ```
 
 This behavior can be easily overridden by specifying a fragment shader:
