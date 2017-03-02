@@ -84,10 +84,10 @@ var blur = op({
     uniform vec2 dxy;
     uniform sampler2D src;
     void main () {
-      vec4 n = texture2D(src, vec2(uv.x, uv.y + dx.y));
-      vec4 s = texture2D(src, vec2(uv.x, uv.y - dx.y));
-      vec4 e = texture2D(src, vec2(uv.x + dx.x, uv.y));
-      vec4 w = texture2D(src, vec2(uv.x - dx.x, uv.y));
+      vec4 n = texture2D(src, vec2(uv.x, uv.y + dxy.y));
+      vec4 s = texture2D(src, vec2(uv.x, uv.y - dxy.y));
+      vec4 e = texture2D(src, vec2(uv.x + dxy.x, uv.y));
+      vec4 w = texture2D(src, vec2(uv.x - dxy.x, uv.y));
       gl_FragColor = 0.25 * (n + s + e + w);
     }
   `
