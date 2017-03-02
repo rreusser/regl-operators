@@ -4,7 +4,7 @@
 
 ## Introduction
 
-This module provides a template for fullscreen operators in regl. It does this by defining a single fullscreen triangle which covers the screen. By default it returns the definition of a copy operator which you may then turn into a regl command. Any or all of the default setup may be overridden.
+This module provides a template for fullscreen operators in regl. It does this by defining a single fullscreen triangle which covers the screen. It returns the definition of the operator (by default, a simply copy) which you may then turn into a regl command. Any or all of the default setup may be overridden.
 
 ## Example
 
