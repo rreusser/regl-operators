@@ -6,6 +6,10 @@
 
 This module provides a template for fullscreen operators in regl. It does this by defining a single fullscreen triangle which covers the screen. It returns the definition of the operator (by default, a simply copy) which you may then turn into a regl command. Any or all of the default setup may be overridden.
 
+## Installation
+
+Not yet on npm. Waiting on a bit more thought and refinement.
+
 ## Example
 
 The default behavior is a copy operator that writes the result to `props.dest` (which is implicitly the screen if that's null/undefined). To copy from a `src` texture to the screen:
