@@ -109,4 +109,4 @@ Returns an object containing the command definition. (To prevent a dependency on
 
 ## License
 
-&copy 2017 Ricky Reusser. MIT License.
+&copy; 2017 Ricky Reusser. MIT License.
