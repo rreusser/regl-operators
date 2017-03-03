@@ -1,4 +1,4 @@
-# regl-operator
+# regl-operators
 
 > Easy setup for a fullscreen operator in [regl](https://github.com/regl-project/regl)
 
@@ -10,13 +10,15 @@ This module provides a template for fullscreen operators in regl. It does this b
 
 Not yet on npm. Waiting on a bit more thought and refinement.
 
+<!--
+
 ## Example
 
 The default behavior is a copy operator that writes the result to `props.dest` (which is implicitly the screen if that's null/undefined). To copy from a `src` texture to the screen:
 
 ```javascript
 var regl = require('regl')
-var reglOp = require('regl-operator')
+var reglOp = require('regl-operators')
 
 // A shortcut to instantiate the command:
 var op = params => regl(reglOp(params))
@@ -96,7 +98,7 @@ var blur = op({
 
 ## API
 
-### `require('regl-operator')(parameters)`
+### `require('regl-operators')(parameters)`
 
 Injects parameters into the default operator template and returns an object which can then be passed to regl. Default parameters are:
 
@@ -112,6 +114,8 @@ Injects parameters into the default operator template and returns an object whic
 | `primitive` | `'triangles'` |
 
 Returns an object containing the command definition. (To prevent a dependency on regl itself, does *not* return an instantiated regl command.)
+
+-->
 
 ## License
 
