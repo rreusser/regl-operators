@@ -56,7 +56,7 @@ test(function (t) {
     viewportHeight: 2
   }), [0.5, 0.5])
 
-  t.equal(copy.framebuffer(null, {dest: 'foo'}), 'foo')
+  t.equal(copy.framebuffer(null, {dst: 'foo'}), 'foo')
   t.equal(copy.primitive, 'pentagons')
   t.deepEqual(copy.depth, {enable: true})
   t.equal(copy.count, 4)
