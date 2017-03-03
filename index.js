@@ -1,10 +1,10 @@
-var map = require('./map')
-var particles = require('./particles')
-var particleLookup = require('./particle-lookup')
+var map = require('./src/map')
+var particles = require('./src/particles')
+var particleLookup = require('./src/particle-lookup')
 
 module.exports = function (regl) {
   return {
-    swap: require('./swap'),
+    swap: require('./src/swap'),
     map: function (opts) {
       return regl(map(opts))
     },

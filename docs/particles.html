@@ -3,8 +3,13 @@
 <head>
 <title>---</title>
 <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport" />
-<meta charset=utf-8></head>
-<body></body>
+<meta charset=utf-8><style type="text/css">.github-corner{display:block;position:absolute;top:0;left:auto;right:0;z-index:10000}.github-corner svg{display:block}.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%{transform:rotate(0)}20%{transform:rotate(-25deg)}40%{transform:rotate(10deg)}60%{transform:rotate(-25deg)}80%{transform:rotate(10deg)}100%{transform:rotate(0)}}@media(max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style></head>
+<body><a href="https://github.com/rreusser/regl-operators" class="github-corner" aria-label="View source on Github"><svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 250 250" fill="#fff">
+  <path d="M0 0l115 115h15l12 27 108 108V0z" fill="#333"/>
+  <path class="octo-arm" d="M128 109c-15-9-9-19-9-19 3-7 2-11 2-11-1-7 3-2 3-2 4 5 2 11 2 11-3 10 5 15 9 16" style="-webkit-transform-origin: 130px 106px; transform-origin: 130px 106px"/>
+  <path class="octo-body" d="M115 115s4 2 5 0l14-14c3-2 6-3 8-3-8-11-15-24 2-41 5-5 10-7 16-7 1-2 3-7 12-11 0 0 5 3 7 16 4 2 8 5 12 9s7 8 9 12c14 3 17 7 17 7-4 8-9 11-11 11 0 6-2 11-7 16-16 16-30 10-41 2 0 3-1 7-5 11l-12 11c-1 1 1 5 1 5z"/>
+</svg>
+</a></body>
 <script>
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 (function (global, factory) {
@@ -8339,26 +8344,6 @@ module.exports.renderbuffer = makeExtend(renderbufferEndpoints);
 module.exports.framebuffer = makeExtend(framebufferEndpoints);
 module.exports.framebufferCube = makeExtend(framebufferCubeEndpoints);
 },{}],3:[function(require,module,exports){
-module.exports = function (color) {
-  var ret = void 0;
-  if (color) {
-    if (Array.isArray(color)) {
-      ret = color.slice();
-
-      if (ret.length > 4) {
-        ret = ret.slice(0, 4);
-      } else if (ret.length !== 4) {
-        while (ret.length < 4) {
-          ret.push(1);
-        }
-      }
-    }
-  } else {
-    ret = [1, 1, 1, 1];
-  }
-  return ret;
-};
-},{}],4:[function(require,module,exports){
 require('regl')({
   extensions: ['OES_texture_float'],
   onDone: require('fail-nicely')(run)
@@ -8407,14 +8392,14 @@ function run(regl) {
     ops.swap(pos);
   });
 }
-},{"../":5,"@rreusser/regl-camera":7,"fail-nicely":8,"regl":1}],5:[function(require,module,exports){
-var map = require('./map');
-var particles = require('./particles');
-var particleLookup = require('./particle-lookup');
+},{"../":4,"@rreusser/regl-camera":5,"fail-nicely":6,"regl":1}],4:[function(require,module,exports){
+var map = require('./src/map');
+var particles = require('./src/particles');
+var particleLookup = require('./src/particle-lookup');
 
 module.exports = function (regl) {
   return {
-    swap: require('./swap'),
+    swap: require('./src/swap'),
     map: function (opts) {
       return regl(map(opts));
     },
@@ -8424,35 +8409,7 @@ module.exports = function (regl) {
     particleLookup: particleLookup
   };
 };
-},{"./map":6,"./particle-lookup":19,"./particles":20,"./swap":21}],6:[function(require,module,exports){
-'use strict';
-
-var extendCommand = require('regl-extend').command;
-
-module.exports = function (opts) {
-  return extendCommand({
-    vert: ['precision mediump float;', 'attribute vec2 xy;', 'varying vec2 uv;', 'void main () {', '  uv = 0.5 * xy + 0.5;', '  gl_Position = vec4(xy, 0, 1);', '}'].join('\n'),
-    frag: ['precision mediump float;', 'varying vec2 uv;', 'uniform sampler2D src;', 'void main () {', '  vec4 color = texture2D(src, uv);', '  gl_FragColor = vec4(uv, 0, 1);', '}'].join('\n'),
-    attributes: {
-      xy: [[-4, -4], [0, 4], [4, -4]]
-    },
-    uniforms: {
-      src: function (ctx, props) {
-        return props.src;
-      },
-      dxy: function (ctx) {
-        return [1 / ctx.viewportWidth, 1 / ctx.viewportHeight];
-      }
-    },
-    framebuffer: function (ctx, props) {
-      return props && props.dst;
-    },
-    primitive: 'triangles',
-    depth: { enable: false },
-    count: 3
-  }, opts || {});
-};
-},{"regl-extend":2}],7:[function(require,module,exports){
+},{"./src/map":18,"./src/particle-lookup":19,"./src/particles":20,"./src/swap":21}],5:[function(require,module,exports){
 var mouseChange = require('mouse-change');
 var mouseWheel = require('mouse-wheel');
 var identity = require('gl-mat4/identity');
@@ -8608,7 +8565,7 @@ function createCamera(regl, props_) {
 
   return setupCamera;
 }
-},{"gl-mat4/identity":9,"gl-mat4/invert":10,"gl-mat4/lookAt":11,"gl-mat4/perspective":12,"mouse-change":14,"mouse-wheel":16}],8:[function(require,module,exports){
+},{"gl-mat4/identity":7,"gl-mat4/invert":8,"gl-mat4/lookAt":9,"gl-mat4/perspective":10,"mouse-change":12,"mouse-wheel":14}],6:[function(require,module,exports){
 'use strict';
 
 var h = require('h');
@@ -8676,7 +8633,7 @@ function failNicely(callback, options) {
     document.body.appendChild(h('div', { style: overlayStyles }, [h('div', { style: containerStyles }, [h('h1', title, { style: headingStyles }), h('p', err, { style: explanationStyles })])]));
   };
 }
-},{"h":13}],9:[function(require,module,exports){
+},{"h":11}],7:[function(require,module,exports){
 module.exports = identity;
 
 /**
@@ -8704,7 +8661,7 @@ function identity(out) {
     out[15] = 1;
     return out;
 };
-},{}],10:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 module.exports = invert;
 
 /**
@@ -8772,7 +8729,7 @@ function invert(out, a) {
 
     return out;
 };
-},{}],11:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 var identity = require('./identity');
 
 module.exports = lookAt;
@@ -8870,7 +8827,7 @@ function lookAt(out, eye, center, up) {
 
     return out;
 };
-},{"./identity":9}],12:[function(require,module,exports){
+},{"./identity":7}],10:[function(require,module,exports){
 module.exports = perspective;
 
 /**
@@ -8904,7 +8861,7 @@ function perspective(out, fovy, aspect, near, far) {
     out[15] = 0;
     return out;
 };
-},{}],13:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 ;(function () {
 
   function h() {
@@ -8943,7 +8900,7 @@ function perspective(out, fovy, aspect, near, far) {
 
   if (typeof module === 'object') module.exports = h;else this.h = h;
 })();
-},{}],14:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 'use strict';
 
 module.exports = mouseListen;
@@ -9150,7 +9107,7 @@ function mouseListen(element, callback) {
 
   return result;
 }
-},{"mouse-event":15}],15:[function(require,module,exports){
+},{"mouse-event":13}],13:[function(require,module,exports){
 'use strict';
 
 function mouseButtons(ev) {
@@ -9211,7 +9168,7 @@ function mouseRelativeY(ev) {
   return 0;
 }
 exports.y = mouseRelativeY;
-},{}],16:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 'use strict';
 
 var toPX = require('to-px');
@@ -9252,7 +9209,7 @@ function mouseWheelListen(element, callback, noScroll) {
   element.addEventListener('wheel', listener);
   return listener;
 }
-},{"to-px":18}],17:[function(require,module,exports){
+},{"to-px":16}],15:[function(require,module,exports){
 module.exports = function parseUnit(str, out) {
     if (!out) out = [0, ''];
 
@@ -9262,7 +9219,7 @@ module.exports = function parseUnit(str, out) {
     out[1] = str.match(/[\d.\-\+]*\s*(.*)/)[1] || '';
     return out;
 };
-},{}],18:[function(require,module,exports){
+},{}],16:[function(require,module,exports){
 'use strict';
 
 var parseUnit = require('parse-unit');
@@ -9324,7 +9281,55 @@ function toPX(str, element) {
   }
   return 1;
 }
-},{"parse-unit":17}],19:[function(require,module,exports){
+},{"parse-unit":15}],17:[function(require,module,exports){
+module.exports = function (color) {
+  var ret = void 0;
+  if (color) {
+    if (Array.isArray(color)) {
+      ret = color.slice();
+
+      if (ret.length > 4) {
+        ret = ret.slice(0, 4);
+      } else if (ret.length !== 4) {
+        while (ret.length < 4) {
+          ret.push(1);
+        }
+      }
+    }
+  } else {
+    ret = [1, 1, 1, 1];
+  }
+  return ret;
+};
+},{}],18:[function(require,module,exports){
+'use strict';
+
+var extendCommand = require('regl-extend').command;
+
+module.exports = function (opts) {
+  return extendCommand({
+    vert: ['precision mediump float;', 'attribute vec2 xy;', 'varying vec2 uv;', 'void main () {', '  uv = 0.5 * xy + 0.5;', '  gl_Position = vec4(xy, 0, 1);', '}'].join('\n'),
+    frag: ['precision mediump float;', 'varying vec2 uv;', 'uniform sampler2D src;', 'void main () {', '  vec4 color = texture2D(src, uv);', '  gl_FragColor = vec4(uv, 0, 1);', '}'].join('\n'),
+    attributes: {
+      xy: [[-4, -4], [0, 4], [4, -4]]
+    },
+    uniforms: {
+      src: function (ctx, props) {
+        return props.src;
+      },
+      dxy: function (ctx) {
+        return [1 / ctx.viewportWidth, 1 / ctx.viewportHeight];
+      }
+    },
+    framebuffer: function (ctx, props) {
+      return props && props.dst;
+    },
+    primitive: 'triangles',
+    depth: { enable: false },
+    count: 3
+  }, opts || {});
+};
+},{"regl-extend":2}],19:[function(require,module,exports){
 'use strict';
 
 module.exports = function (width, height) {
@@ -9386,7 +9391,7 @@ module.exports = function (opts, reglParams) {
     count: width * height
   }, reglParams);
 };
-},{"./color":3,"./particle-lookup":19,"regl-extend":2}],21:[function(require,module,exports){
+},{"./color":17,"./particle-lookup":19,"regl-extend":2}],21:[function(require,module,exports){
 'use strict';
 
 module.exports = swap;
@@ -9401,6 +9406,6 @@ function swap(buffers, i1, i2) {
 
   return buffers;
 }
-},{}]},{},[4]);
+},{}]},{},[3]);
 </script>
 </html>
