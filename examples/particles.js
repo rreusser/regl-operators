@@ -1,5 +1,9 @@
 require('regl')({
   extensions: ['OES_texture_float'],
+  pixelRatio: 1,
+  attributes: {
+    antialias: false,
+  },
   onDone: require('fail-nicely')(run)
 })
 
@@ -46,7 +50,9 @@ function run (regl) {
 
       void main () {
         vec3 p = texture2D(src, uv).xyz;
-        gl_FragColor = vec4(p + lorenz(p + lorenz(p) * 0.5 * dt) * dt, 1);
+        // A half step then a full step for midpoint (RK2) integration:
+        vec3 pm = p + lorenz(p) * 0.5 * dt;
+        gl_FragColor = vec4(p + lorenz(pm) * dt, 1);
       }
     `
   })
@@ -57,11 +63,11 @@ function run (regl) {
     pointSize: 4
   })
 
-  initialize({dst: pos[0]})
+  pos[0].use(() => initialize({dst: pos[0]}))
 
   regl.frame(() => {
     regl.clear({color: [0.2, 0.25, 0.3, 1]})
-    iterate({src: pos[0], dst: pos[1]})
+    pos[1].use(() => iterate({src: pos[0]}))
     camera(() => splat({src: pos[1]}))
     ops.swap(pos)
   })

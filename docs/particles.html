@@ -8346,6 +8346,10 @@ module.exports.framebufferCube = makeExtend(framebufferCubeEndpoints);
 },{}],3:[function(require,module,exports){
 require('regl')({
   extensions: ['OES_texture_float'],
+  pixelRatio: 1,
+  attributes: {
+    antialias: false
+  },
   onDone: require('fail-nicely')(run)
 });
 
@@ -8372,7 +8376,7 @@ function run(regl) {
   });
 
   var iterate = ops.map({
-    frag: '\n      precision mediump float;\n      uniform sampler2D src;\n      varying vec2 uv;\n      const float dt = 0.01;\n\n      vec3 lorenz (vec3 p) {\n        return vec3(\n          p.z * (28.0 - p.y) - p.x,\n          p.z * p.x - 8.0 / 3.0 * p.y,\n          10.0 * (p.x - p.z)\n        );\n      }\n\n      void main () {\n        vec3 p = texture2D(src, uv).xyz;\n        gl_FragColor = vec4(p + lorenz(p + lorenz(p) * 0.5 * dt) * dt, 1);\n      }\n    '
+    frag: '\n      precision mediump float;\n      uniform sampler2D src;\n      varying vec2 uv;\n      const float dt = 0.01;\n\n      vec3 lorenz (vec3 p) {\n        return vec3(\n          p.z * (28.0 - p.y) - p.x,\n          p.z * p.x - 8.0 / 3.0 * p.y,\n          10.0 * (p.x - p.z)\n        );\n      }\n\n      void main () {\n        vec3 p = texture2D(src, uv).xyz;\n        // A half step then a full step for midpoint (RK2) integration:\n        vec3 pm = p + lorenz(p) * 0.5 * dt;\n        gl_FragColor = vec4(p + lorenz(pm) * dt, 1);\n      }\n    '
   });
 
   var splat = ops.particles({
@@ -8381,11 +8385,15 @@ function run(regl) {
     pointSize: 4
   });
 
-  initialize({ dst: pos[0] });
+  pos[0].use(function () {
+    return initialize({ dst: pos[0] });
+  });
 
   regl.frame(function () {
     regl.clear({ color: [0.2, 0.25, 0.3, 1] });
-    iterate({ src: pos[0], dst: pos[1] });
+    pos[1].use(function () {
+      return iterate({ src: pos[0] });
+    });
     camera(function () {
       return splat({ src: pos[1] });
     });
@@ -9308,8 +9316,8 @@ var extendCommand = require('regl-extend').command;
 
 module.exports = function (opts) {
   return extendCommand({
-    vert: ['precision mediump float;', 'attribute vec2 xy;', 'varying vec2 uv;', 'void main () {', '  uv = 0.5 * xy + 0.5;', '  gl_Position = vec4(xy, 0, 1);', '}'].join('\n'),
-    frag: ['precision mediump float;', 'varying vec2 uv;', 'uniform sampler2D src;', 'void main () {', '  vec4 color = texture2D(src, uv);', '  gl_FragColor = vec4(uv, 0, 1);', '}'].join('\n'),
+    vert: ['precision mediump float;', 'attribute vec2 xy;', 'varying vec2 uv;', 'void main () {', '  uv = xy * 0.5 + 0.5;', '  gl_Position = vec4(xy, 0, 1);', '}'].join('\n'),
+    frag: ['precision mediump float;', 'varying vec2 uv;', 'uniform sampler2D src;', 'void main () {', '  gl_FragColor = texture2D(src, uv);', '}'].join('\n'),
     attributes: {
       xy: [[-4, -4], [0, 4], [4, -4]]
     },
@@ -9320,9 +9328,6 @@ module.exports = function (opts) {
       dxy: function (ctx) {
         return [1 / ctx.viewportWidth, 1 / ctx.viewportHeight];
       }
-    },
-    framebuffer: function (ctx, props) {
-      return props && props.dst;
     },
     primitive: 'triangles',
     depth: { enable: false },
@@ -9383,9 +9388,6 @@ module.exports = function (opts, reglParams) {
       position: function (ctx, props) {
         return props && props.src;
       }
-    },
-    framebuffer: function (ctx, props) {
-      return props && props.dst;
     },
     primitive: 'points',
     count: width * height

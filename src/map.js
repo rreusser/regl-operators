@@ -9,7 +9,7 @@ module.exports = function (opts) {
       'attribute vec2 xy;',
       'varying vec2 uv;',
       'void main () {',
-      '  uv = 0.5 * xy + 0.5;',
+      '  uv = xy * 0.5 + 0.5;',
       '  gl_Position = vec4(xy, 0, 1);',
       '}'
     ].join('\n'),
@@ -18,8 +18,7 @@ module.exports = function (opts) {
       'varying vec2 uv;',
       'uniform sampler2D src;',
       'void main () {',
-      '  vec4 color = texture2D(src, uv);',
-      '  gl_FragColor = vec4(uv, 0, 1);',
+      '  gl_FragColor = texture2D(src, uv);',
       '}'
     ].join('\n'),
     attributes: {
@@ -35,9 +34,6 @@ module.exports = function (opts) {
           1 / ctx.viewportHeight
         ]
       }
-    },
-    framebuffer: function (ctx, props) {
-      return props && props.dst
     },
     primitive: 'triangles',
     depth: {enable: false},

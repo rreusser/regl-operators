@@ -63,9 +63,6 @@ module.exports = function (opts, reglParams) {
         return props && props.src
       }
     },
-    framebuffer: function (ctx, props) {
-      return props && props.dst
-    },
     primitive: 'points',
     count: width * height
   }, reglParams)
