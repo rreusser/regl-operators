@@ -63,7 +63,7 @@ function run (regl) {
     pointSize: 4
   })
 
-  pos[0].use(() => initialize({dst: pos[0]}))
+  pos[0].use(() => initialize())
 
   regl.frame(() => {
     regl.clear({color: [0.2, 0.25, 0.3, 1]})
