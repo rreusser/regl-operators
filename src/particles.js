@@ -4,7 +4,7 @@ var extendCommand = require('regl-extend').command
 var createLookup = require('./particle-lookup')
 var color = require('./color')
 
-module.exports = function (opts, reglParams) {
+module.exports = function (regl, opts, reglParams) {
   opts = opts || {}
 
   const width = opts.width || opts.radius
@@ -13,7 +13,7 @@ module.exports = function (opts, reglParams) {
   const pointSize = opts.pointSize || 1
   const dimension = opts.dimension || 3
 
-  return extendCommand({
+  return regl(extendCommand({
     vert: dimension === 2 ? (`
       precision mediump float;
       attribute vec2 uv;
@@ -65,5 +65,5 @@ module.exports = function (opts, reglParams) {
     },
     primitive: 'points',
     count: width * height
-  }, reglParams)
+  }, reglParams))
 }

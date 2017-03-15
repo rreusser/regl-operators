@@ -1,7 +1,8 @@
-var iota = require('iota-array')
 var ndarray = require('ndarray');
 var show = require('ndarray-show');
 var squeeze = require('ndarray-squeeze');
+var glsl = require('glslify');
+
 var regl = require('regl')({
   extensions: ['oes_texture_float'],
   onDone: require('fail-nicely')(run)
@@ -17,34 +18,28 @@ function run (regl) {
       color: regl.texture({
         width: 4,
         height: 1,
-        data: iota(4).map(i => [4 * i, 4 * i + 1, 4 * i + 2, 4 * i + 3]),
+        data: new Array(16).fill(0).map(Math.random),
         type: 'float',
         format: 'rgba',
       })
     })
   )
 
-  // Prefix-sum each texel so that we can pretend we're really dealing
-  // with an unrolled 1-d array of data:
-  var preaccum = ops.map({
-    frag: `
+  var computeLuma = ops.map({
+    frag: glsl(`
       precision mediump float;
+      #pragma glslify: luma = require(glsl-luma)
       varying vec2 uv;
       uniform sampler2D src;
       void main () {
-        vec4 sum = texture2D(src, uv);
-        sum.w += sum.z;
-        sum.zw += sum.y;
-        sum.yzw += sum.x;
-        gl_FragColor = sum;
+        float l = luma(texture2D(src, uv));
+        gl_FragColor = vec4(l, l, 0, 0);
       }
-    `,
+    `),
     framebuffer: regl.prop('dst')
   })
 
-
-  // Prefix-sum across texels by add
-  var prefixSum = ops.scan({
+  var minmax = ops.scan({
     reduce: {
       frag: `
         precision mediump float;
@@ -53,10 +48,9 @@ function run (regl) {
         uniform sampler2D src;
 
         void main () {
-          vec4 prefix = texture2D(src, prefixLocation);
-          vec4 sum = texture2D(src, sumLocation);
-
-          gl_FragColor = sum + prefix.w;
+          vec2 prefix = texture2D(src, prefixLocation).xy;
+          vec2 sum = texture2D(src, sumLocation).xy;
+          gl_FragColor = vec4(min(prefix.x, sum.x), max(prefix.y, sum.y), 0, 0);
         }
       `
     },
@@ -64,11 +58,11 @@ function run (regl) {
 
   var state = {src: fbos[0], dst: fbos[1]}
 
-  state.src.use(() => console.log('input:\n' + show(ndarray(regl.read(), [16]))));
+  state.src.use(() => console.log('input:\n' + show(ndarray(regl.read(), [4, 4]))));
 
-  preaccum(state);
+  computeLuma(state);
   ops.swap(state)
-  prefixSum(state)
+  minmax(state)
 
-  state.dst.use(() => console.log('output:\n' + show(ndarray(regl.read(), [16]))));
+  state.dst.use(() => console.log('output:\n' + show(ndarray(regl.read(), [4, 4]))));
 }

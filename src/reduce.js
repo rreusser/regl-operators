@@ -20,7 +20,7 @@ module.exports = function (regl, opts) {
     uniforms: {
       src: regl.prop('src'),
     },
-    framebuffer: regl.prop('dest'),
+    framebuffer: regl.prop('dst'),
   }
 
   var identity = regl(extendCommand(baseOp, {
@@ -111,18 +111,18 @@ module.exports = function (regl, opts) {
 
   function swap (params) {
     var tmp = params.src;
-    params.src = params.dest;
-    params.dest = tmp;
+    params.src = params.dst;
+    params.dst = tmp;
   }
 
   function log (msg, params) {
     console.log(msg);
     params.src.use(function () {
-      console.log('  src:   ' + show(ndarray(regl.read()).step(4)));
+      console.log('  src:   ' + show(ndarray(regl.read()).step(1)));
     });
 
-    params.dest.use(function () {
-      console.log('  dest:  ' + show(ndarray(regl.read()).step(4)));
+    params.dst.use(function () {
+      console.log('  dst:  ' + show(ndarray(regl.read()).step(1)));
     });
   }
 
@@ -132,8 +132,8 @@ module.exports = function (regl, opts) {
     var doScan = typeof execOpts.scan === 'undefined' ? doScanDflt : execOpts.doScan;
 
     var state = {
-      src: buffers[0],
-      dest: buffers[1],
+      src: buffers.src,
+      dst: buffers.dst,
       axis: execOpts.axis || 0
     };
 
@@ -158,8 +158,8 @@ module.exports = function (regl, opts) {
 
     if (execOpts.verbose) log('output', state);
 
-    buffers[0] = state.dest
-    buffers[1] = state.src
+    buffers.dst = state.src
+    buffers.src = state.dst
 
     return buffers
   }
