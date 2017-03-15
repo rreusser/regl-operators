@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "budo --open --live --host localhost examples/particles.js -t glslify -g es2040",
+    "start": "budo --open --live --host localhost examples/reduce.js -t glslify -g es2040",
     "build:particles": "browserify examples/particles.js -t glslify -g es2040 | indexhtmlify | github-cornerify > docs/particles.html",
     "test": "npm run lint && node test/index.js",
     "lint": "standard",

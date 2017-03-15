@@ -2,8 +2,8 @@
 
 var extendCommand = require('regl-extend').command
 
-module.exports = function (opts) {
-  return extendCommand({
+module.exports = function (regl, opts) {
+  return regl(extendCommand({
     vert: [
       'precision mediump float;',
       'attribute vec2 xy;',
@@ -38,5 +38,5 @@ module.exports = function (opts) {
     primitive: 'triangles',
     depth: {enable: false},
     count: 3
-  }, opts || {})
+  }, opts || {}))
 }
