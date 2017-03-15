@@ -144,6 +144,8 @@ module.exports = function (regl, opts) {
 
     setCommon(() => {
       for (state.shift = 1; state.shift < width; state.shift *= 2) {
+        // TODO: be much more careful about the ordering to avoid switching programs
+        // so often. This could all be done at the end.
         if (doScan) identity(state);
 
         if (execOpts.verbose) log('identity (shift: ' + state.shift + ')', state);

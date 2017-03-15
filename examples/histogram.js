@@ -147,7 +147,7 @@ function run (regl) {
     [1, 1, 1, 1]
   ];
 
-  var maxLuma = ops.reduce({
+  var computMinMax = ops.reduce({
     reduce: {
       frag: `
         precision mediump float;
@@ -217,7 +217,7 @@ function run (regl) {
     histogramRange[0].use(() => preRange({src: histogram}))
 
     // Reduce the value to a single min/max across the whole histogram:
-    var histogramRangeState = maxLuma({src: histogramRange[0], dst: histogramRange[1]});
+    var histogramRangeState = computMinMax({src: histogramRange[0], dst: histogramRange[1]});
 
     // Draw the baboon:
     regl.clear({color: [0, 0, 0, 1]})
