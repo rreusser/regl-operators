@@ -10297,10 +10297,9 @@ var squeeze = require('ndarray-squeeze');
 var glsl = require('glslify');
 
 var regl = require('regl')({
-  extensions: ['oes_texture_float'],
-  attributes: {
-    antialias: false
-  },
+  extensions: ['oes_texture_float', 'oes_texture_float_linear'],
+  pixelRatio: 1,
+  attributes: { antialias: false },
   onDone: require('fail-nicely')(run)
 });
 
@@ -10313,6 +10312,8 @@ function run(regl) {
       depthStencil: false,
       color: regl.texture({
         data: baboonData,
+        mag: 'linear',
+        min: 'linear',
         flipY: true
       }),
       colorType: 'uint8',
@@ -10320,8 +10321,8 @@ function run(regl) {
     });
   });
 
-  var blur = ops.map({
-    frag: '\n      precision mediump float;\n      varying vec2 uv;\n      uniform vec2 dxy;\n      uniform sampler2D src;\n      void main () {\n        vec3 c = texture2D(src, uv).xyz;\n        vec3 n = texture2D(src, uv + vec2(0, dxy.y)).xyz;\n        vec3 s = texture2D(src, uv - vec2(0, dxy.y)).xyz;\n        vec3 e = texture2D(src, uv + vec2(dxy.x, 0)).xyz;\n        vec3 w = texture2D(src, uv - vec2(dxy.x, 0)).xyz;\n        gl_FragColor = vec4(c * 0.2 + 0.8 * 0.25 * (n + s + e + w), 1);\n      }\n    ',
+  var distort = ops.map({
+    frag: '\n      precision mediump float;\n      varying vec2 uv;\n      uniform vec2 dxy;\n      uniform sampler2D src;\n      void main () {\n        vec2 r = uv - 0.5;\n        vec2 dr = vec2(r.y, -r.x);\n        vec3 c = texture2D(src, (r + sin(length(r) * 20.0) * 0.01 * dr) * 1.001 + 0.5).xyz;\n        gl_FragColor = vec4(c, 1);\n      }\n    ',
     framebuffer: regl.prop('dst')
   });
 
@@ -10379,7 +10380,7 @@ function run(regl) {
 
   var colors = [[1, 0, 0, 1], [0, 1, 0, 1], [0, 0, 1, 1], [1, 1, 1, 1]];
 
-  var maxLuma = ops.reduce({
+  var computMinMax = ops.reduce({
     reduce: {
       frag: '\n        precision mediump float;\n        uniform sampler2D src;\n        varying vec2 prefixLocation, sumLocation;\n        void main () {\n          vec2 prefix = texture2D(src, prefixLocation).xy;\n          vec2 sum = texture2D(src, sumLocation).xy;\n          gl_FragColor = vec4(min(prefix.x, sum.x), max(prefix.y, sum.y), 0, 0);\n        }\n      '
     }
@@ -10404,9 +10405,12 @@ function run(regl) {
     depth: { enable: false }
   });
 
-  regl.frame(function () {
+  regl.frame(function (_ref) {
+    var tick = _ref.tick;
 
-    blur({ src: baboon[0], dst: baboon[1] });
+    //if (tick % 20 !== 1) return;
+
+    distort({ src: baboon[0], dst: baboon[1] });
     var tmp = baboon[1];
     baboon[1] = baboon[0];
     baboon[0] = tmp;
@@ -10428,7 +10432,7 @@ function run(regl) {
     });
 
     // Reduce the value to a single min/max across the whole histogram:
-    var histogramRangeState = maxLuma({ src: histogramRange[0], dst: histogramRange[1] });
+    var histogramRangeState = computMinMax({ src: histogramRange[0], dst: histogramRange[1] });
 
     // Draw the baboon:
     regl.clear({ color: [0, 0, 0, 1] });
@@ -18690,6 +18694,8 @@ module.exports = function (regl, opts) {
 
     setCommon(function () {
       for (state.shift = 1; state.shift < width; state.shift *= 2) {
+        // TODO: be much more careful about the ordering to avoid switching programs
+        // so often. This could all be done at the end.
         if (doScan) identity(state);
 
         if (execOpts.verbose) log('identity (shift: ' + state.shift + ')', state);

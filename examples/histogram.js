@@ -5,10 +5,9 @@ var squeeze = require('ndarray-squeeze');
 var glsl = require('glslify');
 
 var regl = require('regl')({
-  extensions: ['oes_texture_float'],
-  attributes: {
-    antialias: false
-  },
+  extensions: ['oes_texture_float', 'oes_texture_float_linear'],
+  pixelRatio: 1,
+  attributes: {antialias: false},
   onDone: require('fail-nicely')(run)
 });
 
@@ -21,25 +20,25 @@ function run (regl) {
     depthStencil: false,
     color: regl.texture({
       data: baboonData,
+      mag: 'linear',
+      min: 'linear',
       flipY: true
     }),
     colorType: 'uint8',
     colorFormat: 'rgba',
   }))
 
-  var blur = ops.map({
+  var distort = ops.map({
     frag: `
       precision mediump float;
       varying vec2 uv;
       uniform vec2 dxy;
       uniform sampler2D src;
       void main () {
-        vec3 c = texture2D(src, uv).xyz;
-        vec3 n = texture2D(src, uv + vec2(0, dxy.y)).xyz;
-        vec3 s = texture2D(src, uv - vec2(0, dxy.y)).xyz;
-        vec3 e = texture2D(src, uv + vec2(dxy.x, 0)).xyz;
-        vec3 w = texture2D(src, uv - vec2(dxy.x, 0)).xyz;
-        gl_FragColor = vec4(c * 0.2 + 0.8 * 0.25 * (n + s + e + w), 1);
+        vec2 r = uv - 0.5;
+        vec2 dr = vec2(r.y, -r.x);
+        vec3 c = texture2D(src, (r + sin(length(r) * 20.0) * 0.01 * dr) * 1.001 + 0.5).xyz;
+        gl_FragColor = vec4(c, 1);
       }
     `,
     framebuffer: regl.prop('dst')
@@ -197,9 +196,10 @@ function run (regl) {
   })
 
 
-  regl.frame(() => {
+  regl.frame(({tick}) => {
+    //if (tick % 20 !== 1) return;
 
-    blur({src: baboon[0], dst: baboon[1]});
+    distort({src: baboon[0], dst: baboon[1]});
     var tmp = baboon[1];
     baboon[1] = baboon[0];
     baboon[0] = tmp;
